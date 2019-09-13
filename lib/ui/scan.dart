@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 
 class Scan extends StatefulWidget {
   @override
@@ -9,10 +10,12 @@ class Scan extends StatefulWidget {
 
 class _ScanState extends State<Scan> {
   File _image;
+  final TextRecognizer textRecognizer = FirebaseVision.instance.textRecognizer();
+  final FirebaseVisionImage visionImage = FirebaseVisionImage.fromFile(imageFile);
   
   Future getImage() async {
     var image = await ImagePicker.pickImage(source: ImageSource.camera);
-
+    print(image.path);
     setState(() {
       _image = image;
     });
