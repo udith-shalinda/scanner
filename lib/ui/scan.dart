@@ -22,11 +22,12 @@ class _ScanState extends State<Scan> {
 
 
   Future getImage() async {
-    File imageFile = await ImagePicker.pickImage(source: ImageSource.gallery);
+    File imageFile = await ImagePicker.pickImage(source: ImageSource.camera);
     setState(() {
       _image = imageFile;
     });
     print(_image.path);
+    // _initializeVision();
   }
   
   @override
@@ -35,7 +36,7 @@ class _ScanState extends State<Scan> {
       appBar: AppBar(
         title: Text('Image Picker Example'),
       ),
-      body: Column(
+      body: ListView(
         children: <Widget>[
           _image == null
               ? Text('No image selected.')
@@ -53,17 +54,25 @@ class _ScanState extends State<Scan> {
       ),
     );
   }
-  void _initializeVision() async {
+  Future _initializeVision() async {
 
     // create vision image from that file
     final FirebaseVisionImage visionImage = FirebaseVisionImage.fromFile(this._image);
     // create detector index
-    final TextRecognizer textRecognizer = FirebaseVision.instance.textRecognizer();
+    // final TextRecognizer textRecognizer = FirebaseVision.instance.textRecognizer();
+    // final VisionText visionText = await textRecognizer.processImage(visionImage);
+    // print(visionText);
+    final ImageLabeler labeler = FirebaseVision.instance.imageLabeler();   
+    final List<ImageLabel> labels = await labeler.processImage(visionImage); 
 
-    // find text in image
 
-    final VisionText visionText = await textRecognizer.processImage(visionImage);
-    print(visionText);
+    for (ImageLabel label in labels) {
+      final String text = label.text;
+      final String entityId = label.entityId;
+      final double confidence = label.confidence;
+      print(text);
+    }
+    labeler.close();
 
     // got the pattern from that SO answer: https://stackoverflow.com/questions/16800540/validate-email-address-in-dart
 //    String mailPattern =
@@ -72,14 +81,14 @@ class _ScanState extends State<Scan> {
 //
 //    String mailAddress =
 //        "Couldn't find any mail in the foto! Please try again!";
-    for (TextBlock block in visionText.blocks) {
-      for (TextLine line in block.lines) {
-//        if (regEx.hasMatch(line.text)) {
-//          mailAddress = line.text;
-          print(line.text);
-//        }
-      }
-    }
+//     for (TextBlock block in visionText.blocks) {
+//       for (TextLine line in block.lines) {
+// //        if (regEx.hasMatch(line.text)) {
+// //          mailAddress = line.text;
+//           print(line.text);
+// //        }
+//       }
+  //   }
   }
 
 }
